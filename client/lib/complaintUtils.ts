@@ -25,26 +25,26 @@ export const isPending = (status: ComplaintStatus): boolean => {
 
 export const getStatusColor = (status: ComplaintStatus): string => {
   const statusColors: Record<ComplaintStatus, string> = {
-    registered: "bg-blue-100 text-blue-800",
-    assigned: "bg-yellow-100 text-yellow-800",
-    in_progress: "bg-orange-100 text-orange-800",
-    resolved: "bg-green-100 text-green-800",
-    closed: "bg-gray-100 text-gray-800",
-    reopened: "bg-red-100 text-red-800",
+    registered: "bg-status-registered text-foreground",
+    assigned: "bg-status-assigned text-foreground",
+    in_progress: "bg-status-progress text-foreground",
+    resolved: "bg-status-resolved text-foreground",
+    closed: "bg-status-closed text-foreground",
+    reopened: "bg-status-reopened text-foreground",
   };
 
-  return statusColors[status] || "bg-gray-100 text-gray-800";
+  return statusColors[status] || "bg-muted text-foreground";
 };
 
 export const getPriorityColor = (priority: ComplaintPriority): string => {
   const priorityColors: Record<ComplaintPriority, string> = {
-    low: "bg-green-100 text-green-800",
-    medium: "bg-yellow-100 text-yellow-800",
-    high: "bg-orange-100 text-orange-800",
-    critical: "bg-red-100 text-red-800",
+    low: "bg-muted text-foreground",
+    medium: "bg-secondary text-secondary-foreground",
+    high: "bg-accent text-accent-foreground",
+    critical: "bg-destructive text-destructive-foreground",
   };
 
-  return priorityColors[priority] || "bg-gray-100 text-gray-800";
+  return priorityColors[priority] || "bg-muted text-foreground";
 };
 
 export const getStatusLabel = (status: ComplaintStatus): string => {
@@ -95,11 +95,11 @@ export const calculateSLAStatus = (
 
 export const getSLAStatusColor = (slaStatus: string): string => {
   const slaColors: Record<string, string> = {
-    ontime: "bg-green-100 text-green-800",
-    warning: "bg-yellow-100 text-yellow-800",
-    overdue: "bg-red-100 text-red-800",
-    completed: "bg-blue-100 text-blue-800",
+    ontime: "bg-status-resolved text-foreground",
+    warning: "bg-status-progress text-foreground",
+    overdue: "bg-destructive text-destructive-foreground",
+    completed: "bg-status-assigned text-foreground",
   };
 
-  return slaColors[slaStatus] || "bg-gray-100 text-gray-800";
+  return slaColors[slaStatus] || "bg-muted text-foreground";
 };

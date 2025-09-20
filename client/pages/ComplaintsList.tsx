@@ -80,6 +80,7 @@ const ComplaintsList: React.FC = () => {
   const [isQuickFormOpen, setIsQuickFormOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -382,81 +383,88 @@ const ComplaintsList: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 items-start">
-            <div className="space-y-1 col-span-1 sm:col-span-2 xl:col-span-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by ID, description, or location..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                  title="Search by complaint ID (e.g., KSC0001), description, or location"
-                />
-                {searchTerm && (
-                  <div className="absolute right-3 top-3">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSearchTerm("")}
-                      className="h-4 w-4 p-0 hover:bg-gray-200"
-                    >
-                      ×
-                    </Button>
-                  </div>
-                )}
-              </div>
-              {searchTerm && (
-                <p className="text-xs text-gray-500">
-                  {searchTerm.match(/^[A-Za-z]/)
-                    ? `Searching for complaint ID: ${searchTerm}`
-                    : `Searching in descriptions and locations`}
-                </p>
-              )}
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                {configuredStatuses.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {prettyLabel(s)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priority</SelectItem>
-                {configuredPriorities.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {prettyLabel(p)}
-                  </SelectItem>
-                ))}
-                {configuredPriorities.includes("HIGH") &&
-                  configuredPriorities.includes("CRITICAL") && (
-                    <SelectItem value="high_critical">
-                      High & Critical
-                    </SelectItem>
-                  )}
-              </SelectContent>
-            </Select>
-
-            {/* Ward Filter - Only for administrators */}
-            {user?.role == "ADMINISTRATOR" && (
-              <Select
-                value={wardFilter}
-                onValueChange={handleWardChange}
-                // disabled
+      <div className="p-2 bg-gray-50 border rounded-md mb-2">
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search by ID, description, or location..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-8 pl-8 pr-6 text-sm"
+              title="Search by complaint ID (e.g., KSC0001), description, or location"
+            />
+            {searchTerm && (
+              <button
+                aria-label="Clear search"
+                onClick={() => setSearchTerm("")}
+                className="absolute right-1 top-1.5 h-5 w-5 rounded hover:bg-gray-200 text-gray-600 flex items-center justify-center"
               >
-                <SelectTrigger>
+                ×
+              </button>
+            )}
+            {searchTerm && (
+              <p className="text-[11px] leading-4 text-gray-500 mt-1">
+                {searchTerm.match(/^[A-Za-z]/)
+                  ? `Searching for complaint ID: ${searchTerm}`
+                  : `Searching in descriptions and locations`}
+              </p>
+            )}
+          </div>
+
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-8 px-2 text-sm w-[160px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              {configuredStatuses.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {prettyLabel(s)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+            <SelectTrigger className="h-8 px-2 text-sm w-[160px]">
+              <SelectValue placeholder="Filter by priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Priority</SelectItem>
+              {configuredPriorities.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {prettyLabel(p)}
+                </SelectItem>
+              ))}
+              {configuredPriorities.includes("HIGH") &&
+                configuredPriorities.includes("CRITICAL") && (
+                  <SelectItem value="high_critical">High & Critical</SelectItem>
+                )}
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAdvanced((v) => !v)}
+            aria-expanded={showAdvanced}
+            className="ml-auto"
+          >
+            {showAdvanced ? "Hide" : "Advanced"}
+          </Button>
+
+          <Button variant="outline" size="sm" onClick={clearFilters}>
+            <Filter className="h-4 w-4 mr-2" />
+            Clear
+          </Button>
+        </div>
+
+        {showAdvanced && (
+          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 items-center text-sm">
+            {user?.role == "ADMINISTRATOR" && (
+              <Select value={wardFilter} onValueChange={handleWardChange}>
+                <SelectTrigger className="h-8 px-2 text-sm">
                   <SelectValue placeholder="Filter by ward" />
                 </SelectTrigger>
                 <SelectContent>
@@ -470,12 +478,11 @@ const ComplaintsList: React.FC = () => {
               </Select>
             )}
 
-            {/* Sub-Zone Filter - Only for admin and when ward is selected */}
             {user?.role === "ADMINISTRATOR" &&
               wardFilter !== "all" &&
               availableSubZones.length > 0 && (
                 <Select value={subZoneFilter} onValueChange={setSubZoneFilter}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-8 px-2 text-sm">
                     <SelectValue placeholder="Filter by sub-zone" />
                   </SelectTrigger>
                   <SelectContent>
@@ -489,9 +496,8 @@ const ComplaintsList: React.FC = () => {
                 </Select>
               )}
 
-            {/* SLA Status Filter */}
             <Select value={slaStatusFilter} onValueChange={setSlaStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8 px-2 text-sm">
                 <SelectValue placeholder="Filter by SLA" />
               </SelectTrigger>
               <SelectContent>
@@ -503,7 +509,6 @@ const ComplaintsList: React.FC = () => {
               </SelectContent>
             </Select>
 
-            {/* Assignment Filter - Only for Ward Officers */}
             {user?.role === "WARD_OFFICER" && (
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -513,19 +518,15 @@ const ComplaintsList: React.FC = () => {
                 />
                 <label
                   htmlFor="needsMaintenanceAssignment"
-                  className="text-sm cursor-pointer"
+                  className="cursor-pointer"
                 >
                   Needs Maintenance Assignment
                 </label>
               </div>
             )}
-            <Button variant="outline" onClick={clearFilters}>
-              <Filter className="h-4 w-4 mr-2" />
-              Clear Filters
-            </Button>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
       {/* Complaints Table */}
       <Card>
@@ -570,72 +571,73 @@ const ComplaintsList: React.FC = () => {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Complaint ID</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Priority</TableHead>
-                    {(user?.role === "ADMINISTRATOR" ||
-                      user?.role === "WARD_OFFICER") && (
-                      <TableHead>Team</TableHead>
-                    )}
-                    {user?.role === "ADMINISTRATOR" && (
-                      <TableHead>Officer</TableHead>
-                    )}
-                    {user?.role !== "CITIZEN" && (
-                      <>
-                        <TableHead>Rating</TableHead>
-                        <TableHead>SLA</TableHead>
-                        <TableHead>Registered On</TableHead>
-                        <TableHead>Updated</TableHead>
-                        <TableHead>Closed</TableHead>
-                        {/* {user?.role === "ADMINISTRATOR" && (
+              <div className="max-h-[500px] overflow-x-auto overflow-y-auto border rounded-md bg-white shadow-sm p-2">
+                <Table className="min-w-max">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Complaint ID</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Priority</TableHead>
+                      {(user?.role === "ADMINISTRATOR" ||
+                        user?.role === "WARD_OFFICER") && (
+                        <TableHead>Team</TableHead>
+                      )}
+                      {user?.role === "ADMINISTRATOR" && (
+                        <TableHead>Officer</TableHead>
+                      )}
+                      {user?.role !== "CITIZEN" && (
+                        <>
+                          <TableHead>Rating</TableHead>
+                          <TableHead>SLA</TableHead>
+                          <TableHead>Registered On</TableHead>
+                          <TableHead>Updated</TableHead>
+                          <TableHead>Closed</TableHead>
+                          {/* {user?.role === "ADMINISTRATOR" && (
                           <>
                             <TableHead>Maintenance Team ID</TableHead>
                             <TableHead>Ward Officer ID</TableHead>
                           </>
                         )} */}
-                      </>
-                    )}
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredComplaints.map((complaint) => (
-                    <TableRow key={complaint.id}>
-                      <TableCell className="font-medium">
-                        #{complaint.complaintId || complaint.id.slice(-6)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-xs">
-                          <p className="truncate">{complaint.description}</p>
-                          <p className="text-sm text-gray-500">
-                            {complaint.type.replace("_", " ")}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {complaint.area}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(complaint.status)}>
-                          {complaint.status.replace("_", " ")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <Badge
-                            className={getPriorityColor(complaint.priority)}
-                          >
-                            {complaint.priority}
+                        </>
+                      )}
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredComplaints.map((complaint) => (
+                      <TableRow key={complaint.id}>
+                        <TableCell className="font-medium">
+                          #{complaint.complaintId || complaint.id.slice(-6)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-xs">
+                            <p className="truncate">{complaint.description}</p>
+                            <p className="text-sm text-gray-500">
+                              {complaint.type.replace("_", " ")}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center text-sm">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            {complaint.area}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(complaint.status)}>
+                            {complaint.status.replace("_", " ")}
                           </Badge>
-                          {/* {(complaint as any).needsTeamAssignment &&
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <Badge
+                              className={getPriorityColor(complaint.priority)}
+                            >
+                              {complaint.priority}
+                            </Badge>
+                            {/* {(complaint as any).needsTeamAssignment &&
                             !["RESOLVED", "CLOSED"].includes(
                               complaint.status,
                             ) && (
@@ -643,76 +645,80 @@ const ComplaintsList: React.FC = () => {
                                 Needs Team Assignment
                               </Badge>
                             )} */}
-                        </div>
-                      </TableCell>
-                      {(user?.role === "ADMINISTRATOR" ||
-                        user?.role === "WARD_OFFICER") && (
-                        <TableCell>
-                          {complaint.maintenanceTeam?.fullName ? (
-                            <span className="text-sm">
-                              {complaint.maintenanceTeam.fullName}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-gray-500">-</span>
-                          )}
+                          </div>
                         </TableCell>
-                      )}
-                      {user?.role === "ADMINISTRATOR" && (
-                        <TableCell>
-                          {complaint.wardOfficer?.fullName ? (
-                            <span className="text-sm">
-                              {complaint.wardOfficer.fullName}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-gray-500">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {user?.role !== "CITIZEN" && (
-                        <>
+                        {(user?.role === "ADMINISTRATOR" ||
+                          user?.role === "WARD_OFFICER") && (
                           <TableCell>
-                            {typeof complaint.rating === "number" &&
-                            complaint.rating > 0 ? (
-                              <span className="text-sm font-medium">
-                                {complaint.rating}/5
-                              </span>
-                            ) : (
-                              <span className="text-xs text-gray-500">N/A</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getSLAColor(complaint.slaStatus)}>
-                              {complaint.slaStatus.replace("_", " ")}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center text-sm">
-                              <Calendar className="h-3 w-3 mr-1" />
-                              {new Date(
-                                complaint.submittedOn,
-                              ).toLocaleDateString()}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm">
-                              {new Date(
-                                complaint.updatedAt,
-                              ).toLocaleDateString()}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            {complaint.closedOn ? (
+                            {complaint.maintenanceTeam?.fullName ? (
                               <span className="text-sm">
-                                {new Date(
-                                  complaint.closedOn,
-                                ).toLocaleDateString()}
+                                {complaint.maintenanceTeam.fullName}
                               </span>
                             ) : (
                               <span className="text-xs text-gray-500">-</span>
                             )}
                           </TableCell>
+                        )}
+                        {user?.role === "ADMINISTRATOR" && (
+                          <TableCell>
+                            {complaint.wardOfficer?.fullName ? (
+                              <span className="text-sm">
+                                {complaint.wardOfficer.fullName}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-500">-</span>
+                            )}
+                          </TableCell>
+                        )}
+                        {user?.role !== "CITIZEN" && (
+                          <>
+                            <TableCell>
+                              {typeof complaint.rating === "number" &&
+                              complaint.rating > 0 ? (
+                                <span className="text-sm font-medium">
+                                  {complaint.rating}/5
+                                </span>
+                              ) : (
+                                <span className="text-xs text-gray-500">
+                                  N/A
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className={getSLAColor(complaint.slaStatus)}
+                              >
+                                {complaint.slaStatus.replace("_", " ")}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center text-sm">
+                                <Calendar className="h-3 w-3 mr-1" />
+                                {new Date(
+                                  complaint.submittedOn,
+                                ).toLocaleDateString()}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm">
+                                {new Date(
+                                  complaint.updatedAt,
+                                ).toLocaleDateString()}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              {complaint.closedOn ? (
+                                <span className="text-sm">
+                                  {new Date(
+                                    complaint.closedOn,
+                                  ).toLocaleDateString()}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-gray-500">-</span>
+                              )}
+                            </TableCell>
 
-                          {/* {user?.role === "ADMINISTRATOR" && (
+                            {/* {user?.role === "ADMINISTRATOR" && (
                             <>
                               <TableCell>
                                 {complaint.maintenanceTeam?.id ||
@@ -726,33 +732,34 @@ const ComplaintsList: React.FC = () => {
                               </TableCell>
                             </>
                           )} */}
-                        </>
-                      )}
-                      <TableCell>
-                        <ComplaintQuickActions
-                          complaint={{
-                            id: complaint.id,
-                            complaintId: complaint.complaintId,
-                            status: complaint.status,
-                            priority: complaint.priority,
-                            type: complaint.type,
-                            description: complaint.description,
-                            area: complaint.area,
-                            assignedTo: complaint.assignedTo,
-                          }}
-                          userRole={user?.role || ""}
-                          showDetails={false}
-                          onUpdate={() => refetch()}
-                          onShowUpdateModal={(c) => {
-                            setSelectedComplaint(complaint);
-                            setIsUpdateModalOpen(true);
-                          }}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                          </>
+                        )}
+                        <TableCell>
+                          <ComplaintQuickActions
+                            complaint={{
+                              id: complaint.id,
+                              complaintId: complaint.complaintId,
+                              status: complaint.status,
+                              priority: complaint.priority,
+                              type: complaint.type,
+                              description: complaint.description,
+                              area: complaint.area,
+                              assignedTo: complaint.assignedTo,
+                            }}
+                            userRole={user?.role || ""}
+                            showDetails={false}
+                            onUpdate={() => refetch()}
+                            onShowUpdateModal={(c) => {
+                              setSelectedComplaint(complaint);
+                              setIsUpdateModalOpen(true);
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               {/* Pagination and records-per-page controls */}
               <div className="flex items-center justify-between mt-4">

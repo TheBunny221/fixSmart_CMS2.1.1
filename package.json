@@ -54,7 +54,15 @@
     "db:stats": "node prisma/migration-utils.js stats",
     "db:cleanup": "node prisma/migration-utils.js cleanup",
     "db:check": "node prisma/migration-utils.js check",
-    "postinstall": "npm run db:generate:dev"
+    "postinstall": "npm run db:generate:dev",
+    "validate:db": "node scripts/validate-db-env.js",
+    "preserver:prod": "node scripts/validate-db-env.js && npx prisma migrate deploy --schema=prisma/schema.prod.prisma && npx prisma generate --schema=prisma/schema.prod.prisma",
+    "db:dev": "npx prisma migrate dev --schema=prisma/schema.dev.prisma --name init && npx prisma generate --schema=prisma/schema.dev.prisma",
+    "db:prod": "npx prisma migrate deploy --schema=prisma/schema.prod.prisma && npx prisma generate --schema=prisma/schema.prod.prisma",
+    "db:reset": "npx prisma migrate reset --force",
+    "setup:dev": "npm run db:dev && npm run dev",
+    "setup:prod": "npm run preserver:prod && npm run server:prod",
+    "preserver:dev": "node scripts/validate-db-env.js && npx prisma generate --schema=prisma/schema.dev.prisma"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",
@@ -95,6 +103,7 @@
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
     "html2canvas": "^1.4.1",
+    "i18next": "^25.5.2",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.1",
     "leaflet": "^1.9.4",
@@ -105,6 +114,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.48.2",
+    "react-i18next": "^15.7.3",
     "react-leaflet": "^5.0.0",
     "react-redux": "^9.0.4",
     "react-router-dom": "^6.20.1",

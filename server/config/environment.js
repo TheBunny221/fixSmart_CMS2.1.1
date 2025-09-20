@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
-
+dotenv.config();
 // Function to load environment-specific configuration
 export function loadEnvironmentConfig() {
   // Preserve the initial NODE_ENV set by the runtime (e.g., scripts)

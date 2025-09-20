@@ -12,20 +12,43 @@ interface SystemConfigContextType {
   appLogoUrl: string;
   appLogoSize: string;
   isLoading: boolean;
+  isInitialized: boolean;
   refreshConfig: () => Promise<void>;
   getConfig: (key: string, defaultValue?: string) => string;
 }
 
-const SystemConfigContext = createContext<SystemConfigContextType | undefined>(
-  undefined,
+// Default configuration values to prevent null errors
+const DEFAULT_CONFIG: SystemConfig = {
+  APP_NAME: "Kochi Smart City",
+  APP_LOGO_URL: "/logo.png",
+  APP_LOGO_SIZE: "medium",
+  COMPLAINT_ID_PREFIX: "KSC",
+  COMPLAINT_ID_START_NUMBER: "1",
+  COMPLAINT_ID_LENGTH: "4",
+};
+
+// Default context value to prevent null errors
+const defaultContextValue: SystemConfigContextType = {
+  config: DEFAULT_CONFIG,
+  appName: DEFAULT_CONFIG.APP_NAME || "Kochi Smart City",
+  appLogoUrl: DEFAULT_CONFIG.APP_LOGO_URL || "/logo.png",
+  appLogoSize: DEFAULT_CONFIG.APP_LOGO_SIZE || "medium",
+  isLoading: true,
+  isInitialized: false,
+  refreshConfig: async () => {},
+  getConfig: (key: string, defaultValue: string = "") => DEFAULT_CONFIG[key] || defaultValue,
+};
+
+const SystemConfigContext = createContext<SystemConfigContextType>(
+  defaultContextValue,
 );
 
 export const useSystemConfig = () => {
   const context = useContext(SystemConfigContext);
-  if (context === undefined) {
-    throw new Error(
-      "useSystemConfig must be used within a SystemConfigProvider",
-    );
+  // Context will never be undefined now, but we can still validate
+  if (!context) {
+    console.warn("useSystemConfig called outside SystemConfigProvider, using defaults");
+    return defaultContextValue;
   }
   return context;
 };
@@ -37,7 +60,8 @@ interface SystemConfigProviderProps {
 export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
   children,
 }) => {
-  const [config, setConfig] = useState<SystemConfig>({});
+  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Use RTK Query hook for better error handling and caching
   const {
@@ -55,6 +79,7 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         configMap[setting.key] = setting.value;
       });
       setConfig(configMap);
+      setIsInitialized(true);
       console.log("System config loaded successfully via RTK Query");
     } else if (error) {
       const errorMessage = getApiErrorMessage(error);
@@ -63,20 +88,14 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
         errorMessage,
       );
       console.error("Full error details:", {
-        status: error?.status,
-        data: error?.data,
-        message: error?.message,
-        error: error?.error,
+        status: 'status' in error ? error.status : 'unknown',
+        data: 'data' in error ? error.data : 'unknown',
+        message: 'message' in error ? error.message : 'unknown',
+        error: error,
       });
       // Fallback to default values
-      setConfig({
-        APP_NAME: "Kochi Smart City",
-        APP_LOGO_URL: "/logo.png",
-        APP_LOGO_SIZE: "medium",
-        COMPLAINT_ID_PREFIX: "KSC",
-        COMPLAINT_ID_START_NUMBER: "1",
-        COMPLAINT_ID_LENGTH: "4",
-      });
+      setConfig(DEFAULT_CONFIG);
+      setIsInitialized(true);
     }
   }, [configResponse, error]);
 
@@ -100,6 +119,7 @@ export const SystemConfigProvider: React.FC<SystemConfigProviderProps> = ({
     appLogoUrl,
     appLogoSize,
     isLoading,
+    isInitialized,
     refreshConfig,
     getConfig,
   };

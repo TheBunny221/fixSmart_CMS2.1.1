@@ -2,6 +2,8 @@ import pkg from "@prisma/client";
 const { PrismaClient } = pkg;
 import fs from "fs";
 import path from "path";
+import dotenv from "dotenv";
+dotenv.config();
 
 // Initialize Prisma client with production-grade configuration
 const createPrismaClient = () => {

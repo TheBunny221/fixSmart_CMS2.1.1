@@ -373,7 +373,7 @@ const Login: React.FC = () => {
                   Register here
                 </Link>
               </p>
-              <p className="text-sm text-gray-600">
+             { /**<p className="text-sm text-gray-600">
                 Guest user?{" "}
                 <Link
                   to="/guest/complaint"
@@ -381,7 +381,7 @@ const Login: React.FC = () => {
                 >
                   Submit complaint
                 </Link>
-              </p>
+              </p>*/}
               <p className="text-sm text-gray-600">
                 <Link
                   to="/"

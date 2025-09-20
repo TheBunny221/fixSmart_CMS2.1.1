@@ -230,71 +230,119 @@ const AdminDashboard: React.FC = () => {
             </div>
             <Shield className="h-16 w-16 text-purple-200" />
           </div>
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+         {/* <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-lg p-3 shadow">
+              <div className="text-2xl font-bold text-gray-900">
                 {systemStats.totalComplaints}
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-gray-600 flex items-center gap-1">
                 Total Complaints
                 <UITooltip>
                   <TooltipTrigger>
-                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                    <Info className="h-3.5 w-3.5 text-gray-500" />
                   </TooltipTrigger>
                   <TooltipContent>All complaints in the system.</TooltipContent>
                 </UITooltip>
               </div>
             </div>
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+
+            <div className="bg-white rounded-lg p-3 shadow">
+              <div className="text-2xl font-bold text-gray-900">
                 {systemStats.activeUsers || 0}
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-gray-600 flex items-center gap-1">
                 Active Users
                 <UITooltip>
                   <TooltipTrigger>
-                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                    <Info className="h-3.5 w-3.5 text-gray-500" />
                   </TooltipTrigger>
-                  <TooltipContent>
-                    Users who have logged in recently.
-                  </TooltipContent>
+                  <TooltipContent>Users who have logged in recently.</TooltipContent>
                 </UITooltip>
               </div>
             </div>
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+
+            <div className="bg-white rounded-lg p-3 shadow">
+              <div className="text-2xl font-bold text-gray-900">
                 {metrics?.slaCompliance || 0}%
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-gray-600 flex items-center gap-1">
                 SLA Compliance
                 <UITooltip>
                   <TooltipTrigger>
-                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                    <Info className="h-3.5 w-3.5 text-gray-500" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    Average on‑time performance across complaint types, using
-                    each type’s configured SLA hours.
+                    Average on-time performance across complaint types, using each
+                    type’s configured SLA hours.
                   </TooltipContent>
                 </UITooltip>
               </div>
             </div>
-            <div className="bg-purple-700 rounded-lg p-3">
-              <div className="text-2xl font-bold">
+
+            <div className="bg-white rounded-lg p-3 shadow">
+              <div className="text-2xl font-bold text-gray-900">
                 {(metrics?.citizenSatisfaction || 0).toFixed(1)}/5
               </div>
-              <div className="text-sm text-purple-200 flex items-center gap-1">
+              <div className="text-sm text-gray-600 flex items-center gap-1">
                 Satisfaction
                 <UITooltip>
                   <TooltipTrigger>
-                    <Info className="h-3.5 w-3.5 text-purple-200/80" />
+                    <Info className="h-3.5 w-3.5 text-gray-500" />
                   </TooltipTrigger>
-                  <TooltipContent>
-                    Average citizen feedback score.
-                  </TooltipContent>
+                  <TooltipContent>Average citizen feedback score.</TooltipContent>
                 </UITooltip>
               </div>
             </div>
+          </div>*/}
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              {
+                value: systemStats.totalComplaints,
+                label: "Total Complaints",
+                tooltip: "All complaints in the system."
+              },
+              {
+                value: systemStats.activeUsers || 0,
+                label: "Active Users",
+                tooltip: "Users who have logged in recently."
+              },
+              {
+                value: `${metrics?.slaCompliance || 0}%`,
+                label: "SLA Compliance",
+                tooltip:
+                  "Average on-time performance across complaint types, using each type’s configured SLA hours."
+              },
+              {
+                value: `${(metrics?.citizenSatisfaction || 0).toFixed(1)}/5`,
+                label: "Satisfaction",
+                tooltip: "Average citizen feedback score."
+              }
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="relative z-0 rounded-3xl p-5 bg-gradient-to-br from-white/80 to-gray-50/40
+                 backdrop-blur-xl border border-white/30 shadow-sm
+                 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="text-3xl font-semibold text-gray-900">{item.value}</div>
+                <div className="mt-2 text-sm text-gray-700 flex items-center gap-1">
+                  {item.label}
+                  <UITooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-gray-500 hover:text-gray-700 transition-colors" />
+                    </TooltipTrigger>
+                    <TooltipContent className="z-50 relative">
+                      {item.tooltip}
+                    </TooltipContent>
+                  </UITooltip>
+                </div>
+              </div>
+            ))}
           </div>
+
+
+
+
         </div>
 
         {hasError && (

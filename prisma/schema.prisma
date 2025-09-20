@@ -77,8 +77,8 @@ model User {
   ward              Ward?              @relation(fields: [wardId], references: [id])
   submittedComplaints Complaint[]      @relation("SubmittedBy")
   assignedComplaints  Complaint[]      @relation("AssignedTo")
-  wardOfficerComplaints Complaint[]    @relation("WardOfficerAssigned")
-  maintenanceTeamComplaints Complaint[] @relation("MaintenanceTeamAssigned")
+  wardOfficerComplaints Complaint[]    @relation("WardOfficer")
+  maintenanceTeamComplaints Complaint[] @relation("MaintenanceTeam")
   submittedServiceRequests ServiceRequest[] @relation("ServiceSubmittedBy")
   assignedServiceRequests  ServiceRequest[] @relation("ServiceAssignedTo")
   statusLogs        StatusLog[]
@@ -162,10 +162,10 @@ model Complaint {
   
   // Assignment and Tracking
   submittedById   String?
-  assignedToId    String?
-  wardOfficerId   String?           // Specific ward officer assignment
-  maintenanceTeamId String?         // Specific maintenance team member assignment
+  assignedToId    String?           // Generic assignment field (kept for backward compatibility)
   resolvedById    String?
+  wardOfficerId   String?           // Automatically assigned ward officer
+  maintenanceTeamId String?         // Assigned maintenance team member
   
   // Timestamps
   submittedOn     DateTime          @default(now())
@@ -178,6 +178,7 @@ model Complaint {
   remarks         String?
   citizenFeedback String?
   rating          Int?              // 1-5 rating
+  assignToTeam    Boolean   @default(false)  // added field for team assignment in ward dashboard
   tags            String?           // JSON array of tags
   
   // Relations
@@ -185,8 +186,8 @@ model Complaint {
   subZone         SubZone?          @relation(fields: [subZoneId], references: [id])
   submittedBy     User?             @relation("SubmittedBy", fields: [submittedById], references: [id])
   assignedTo      User?             @relation("AssignedTo", fields: [assignedToId], references: [id])
-  wardOfficer     User?             @relation("WardOfficerAssigned", fields: [wardOfficerId], references: [id])
-  maintenanceTeam User?             @relation("MaintenanceTeamAssigned", fields: [maintenanceTeamId], references: [id])
+  wardOfficer     User?             @relation("WardOfficer", fields: [wardOfficerId], references: [id])
+  maintenanceTeam User?             @relation("MaintenanceTeam", fields: [maintenanceTeamId], references: [id])
   statusLogs      StatusLog[]
   attachments     Attachment[]
   notifications   Notification[]
@@ -201,15 +202,12 @@ model Complaint {
   @@index([submittedById, createdAt])
   @@index([wardId, status])
   @@index([assignedToId, status])
-  @@index([wardOfficerId, status])
   @@index([maintenanceTeamId, status])
   @@index([type, status])
   @@index([priority, status])
   @@index([submittedOn])
   @@index([status, createdAt])
   @@index([type, createdAt])
-  @@index([wardId, createdAt])
-  @@index([wardId, status, type, createdAt])
   @@map("complaints")
 }
 
@@ -329,10 +327,11 @@ model SystemConfig {
   id          String    @id @default(cuid())
   key         String    @unique
   value       String
+  type        String?   // Type to categorize the setting (e.g., 'app', 'complaint', 'contact', 'system')
   description String?
   isActive    Boolean   @default(true)
   updatedAt   DateTime  @updatedAt
-  
+
   @@index([key, isActive])
   @@map("system_config")
 }

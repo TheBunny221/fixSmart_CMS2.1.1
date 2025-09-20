@@ -212,7 +212,7 @@ const QuickComplaintForm: React.FC<QuickComplaintFormProps> = ({
     label: type.label,
     icon: getIconForComplaintType(type.value),
   }));
-
+  console.warn(problemTypes);
   // Derive sub-zones for the selected ward (from public wards response which includes subZones)
   const selectedWard = wards.find((w: any) => w.id === formData.ward);
   const subZonesForWard = selectedWard?.subZones || [];

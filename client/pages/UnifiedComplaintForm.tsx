@@ -249,8 +249,7 @@ const UnifiedComplaintForm: React.FC = () => {
     const lng = parseFloat(getConfig("MAP_DEFAULT_LNG", "76.2673")) || 76.2673;
     prewarmMapAssets(lat, lng, 13);
   }, [getConfig]);
-
-  // Get current location
+c  // Get current location
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(

@@ -367,15 +367,15 @@ const Register: React.FC = () => {
                   Sign in here
                 </Link>
               </p>
-              <p className="text-sm text-gray-600">
-                Or{" "}
+              {/*<p className="text-sm text-gray-600">
+                Or
                 <Link
                   to="/guest/complaint"
                   className="text-green-600 hover:underline"
                 >
                   Submit as Guest
                 </Link>
-              </p>
+              </p> */}
               <p className="text-sm text-gray-600">
                 <Link
                   to="/"

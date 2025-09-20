@@ -1690,8 +1690,8 @@ const UnifiedReports: React.FC = () => {
 
           {/* Performance Tab */}
           <TabsContent value="performance" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+              {/* <Card>
                 <CardHeader>
                   <CardTitle>Performance Metrics</CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -1730,7 +1730,7 @@ const UnifiedReports: React.FC = () => {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               <Card>
                 <CardHeader>

@@ -278,7 +278,7 @@ const Navigation: React.FC = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Link to="/complaint">
+              {/* <Link to="/complaint">
                 <Button variant="outline" size="sm">
                   <span className="hidden lg:inline">
                     {translations?.complaints?.registerComplaint ||
@@ -286,7 +286,7 @@ const Navigation: React.FC = () => {
                   </span>
                   <span className="lg:hidden">Complaint</span>
                 </Button>
-              </Link>
+              </Link> */}
               <Link to="/login">
                 <Button variant="outline" size="sm">
                   <span className="hidden lg:inline">

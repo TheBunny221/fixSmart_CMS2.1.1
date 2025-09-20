@@ -248,7 +248,21 @@ export function createApp() {
     }),
   );
 
-  // API Routes
+  // Debug middleware for guest OTP routes
+  app.use("/api/guest-otp", (req, res, next) => {
+    console.log("🔍 Guest OTP request:", {
+      path: req.path,
+      method: req.method,
+      headers: req.headers,
+    });
+    next();
+  });
+
+  // Public routes first (no auth required)
+  app.use("/api/guest-otp", guestOtpRoutes);
+  app.use("/api/captcha", captchaRoutes);
+  
+  // Other API routes
   app.use("/api/auth", authRoutes);
   app.use("/api/users", userRoutes);
   app.use("/api/complaints", complaintRoutes);
@@ -260,10 +274,8 @@ export function createApp() {
   app.use("/api/uploads", uploadRoutes);
   app.use("/api/complaint-types", complaintTypeRoutes);
   app.use("/api/system-config", systemConfigRoutes);
-  app.use("/api/captcha", captchaRoutes);
   app.use("/api", materialsRoutes);
   app.use("/api", complaintPhotosRoutes);
-  app.use("/api/guest-otp", guestOtpRoutes);
 
   // Serve uploaded files
   const uploadsPath = path.join(__dirname, "../uploads");

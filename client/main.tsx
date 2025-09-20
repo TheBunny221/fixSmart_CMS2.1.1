@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./global.css";
+import "./utils/i18n";
 import { fixResizeObserverError } from "./utils/resizeObserverFix";
 
 // Preserve original fetch BEFORE any third-party libraries can override it

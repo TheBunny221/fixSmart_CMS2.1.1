@@ -222,6 +222,23 @@ const App: React.FC = () => {
                             </UnifiedLayout>
                           }
                         />
+                        <Route
+                          path="/complaint/:id"
+                          element={
+                            <UnifiedLayout>
+                              <RoleBasedRoute
+                                allowedRoles={[
+                                  "CITIZEN",
+                                  "WARD_OFFICER",
+                                  "MAINTENANCE_TEAM",
+                                  "ADMINISTRATOR",
+                                ]}
+                              >
+                                <ComplaintDetails />
+                              </RoleBasedRoute>
+                            </UnifiedLayout>
+                          }
+                        />
 
                         {/* Ward Officer routes */}
                         <Route

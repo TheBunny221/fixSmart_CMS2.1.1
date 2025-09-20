@@ -25,7 +25,8 @@ interface AppInitializerProps {
 const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   const dispatch = useAppDispatch();
   const [isInitialized, setIsInitialized] = useState(false);
-  const { appName } = useSystemConfig();
+  const { appName, isInitialized: isConfigReady, isLoading: isConfigLoading } =
+    useSystemConfig();
 
   // Set document title
   useDocumentTitle();
@@ -36,8 +37,9 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
 
   // Check if Redux already has auth state
   const reduxAuth = useAppSelector((state) => state.auth);
-  const isAlreadyAuthenticated =
-    reduxAuth.isAuthenticated && reduxAuth.user && reduxAuth.token;
+  const isAlreadyAuthenticated = Boolean(
+    reduxAuth.isAuthenticated && reduxAuth.user && reduxAuth.token
+  );
 
   // Use RTK Query to get current user if we have a token but are not already authenticated
   const {
@@ -109,6 +111,7 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
             localStorage.removeItem("token");
 
             // Log specific error types for debugging
+            const errorCode = error?.data?.code || error?.data?.error || null;
             if (errorCode) {
               console.log(`📋 Handling auth error: ${errorCode}`);
 
@@ -203,6 +206,8 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   // Show loading screen while initializing or checking user (but not if already authenticated)
   if (
     !isInitialized ||
+    isConfigLoading ||
+    !isConfigReady ||
     (hasValidToken && !isAlreadyAuthenticated && isLoadingUser)
   ) {
     return (

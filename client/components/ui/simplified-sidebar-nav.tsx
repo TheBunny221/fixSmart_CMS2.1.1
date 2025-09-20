@@ -76,12 +76,12 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
     //   icon: <Calendar className="h-4 w-4" />,
     //   roles: ["WARD_OFFICER", "MAINTENANCE_TEAM"],
     // },
-    {
-      label: translations?.nav?.ward || "Ward Management",
-      path: "/ward",
-      icon: <MapPin className="h-4 w-4" />,
-      roles: ["WARD_OFFICER"],
-    },
+    // {
+    //   label: translations?.nav?.ward || "Ward Management",
+    //   path: "/ward",
+    //   icon: <MapPin className="h-4 w-4" />,
+    //   roles: ["WARD_OFFICER"],
+    // },
     {
       label: translations?.nav?.maintenance || "Maintenance",
       path: "/maintenance",

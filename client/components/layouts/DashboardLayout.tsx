@@ -13,7 +13,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   className,
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Top Navigation */}
       <Navigation />
 

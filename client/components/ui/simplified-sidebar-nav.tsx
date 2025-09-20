@@ -151,15 +151,15 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
   return (
     <div
       className={cn(
-        "bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out flex flex-col h-full",
+        "bg-background text-foreground border-r border-border shadow-sm transition-all duration-300 ease-in-out flex flex-col h-full",
         isCollapsed ? "w-16" : "w-64",
         className,
       )}
     >
       {/* Header with toggle button only */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         {!isCollapsed && (
-          <h2 className="text-xs font-semibold text-gray-500 tracking-wider uppercase">
+          <h2 className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">
             Menu
           </h2>
         )}
@@ -167,12 +167,12 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
           variant="ghost"
           size="sm"
           onClick={() => dispatch(toggleSidebarCollapsed())}
-          className="p-1.5 hover:bg-gray-100 rounded-md ml-auto"
+          className="p-1.5 hover:bg-accent rounded-md ml-auto"
         >
           {isCollapsed ? (
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           ) : (
-            <ChevronLeft className="h-4 w-4 text-gray-400" />
+            <ChevronLeft className="h-4 w-4 text-muted-foreground" />
           )}
         </Button>
       </div>
@@ -186,8 +186,8 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
             className={cn(
               "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group",
               isActiveRoute(item.path)
-                ? "bg-primary text-white shadow-md"
-                : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm",
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground hover:shadow-sm",
               isCollapsed ? "justify-center" : "justify-start",
             )}
             title={isCollapsed ? item.label : undefined}
@@ -197,8 +197,8 @@ export const SimplifiedSidebarNav: React.FC<SimplifiedSidebarNavProps> = ({
                 className: cn(
                   "h-4 w-4",
                   isActiveRoute(item.path)
-                    ? "text-white"
-                    : "text-gray-500 group-hover:text-gray-700",
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground group-hover:text-foreground",
                 ),
               })}
             </span>

@@ -356,10 +356,10 @@ const ComplaintsList: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-foreground">
             {user?.role === "MAINTENANCE_TEAM" ? "My Complaints" : "Complaints"}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             {user?.role === "MAINTENANCE_TEAM"
               ? "View and manage complaints you have submitted"
               : "Manage and track all complaints"}
@@ -383,10 +383,10 @@ const ComplaintsList: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="p-2 bg-gray-50 border rounded-md mb-2">
+      <div className="p-2 bg-muted border border-border rounded-md mb-2">
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by ID, description, or location..."
               value={searchTerm}
@@ -398,13 +398,13 @@ const ComplaintsList: React.FC = () => {
               <button
                 aria-label="Clear search"
                 onClick={() => setSearchTerm("")}
-                className="absolute right-1 top-1.5 h-5 w-5 rounded hover:bg-gray-200 text-gray-600 flex items-center justify-center"
+                className="absolute right-1 top-1.5 h-5 w-5 rounded hover:bg-accent text-muted-foreground flex items-center justify-center"
               >
                 ×
               </button>
             )}
             {searchTerm && (
-              <p className="text-[11px] leading-4 text-gray-500 mt-1">
+              <p className="text-[11px] leading-4 text-muted-foreground mt-1">
                 {searchTerm.match(/^[A-Za-z]/)
                   ? `Searching for complaint ID: ${searchTerm}`
                   : `Searching in descriptions and locations`}
@@ -552,16 +552,16 @@ const ComplaintsList: React.FC = () => {
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
                 </div>
               ))}
             </div>
           ) : filteredComplaints.length === 0 ? (
             <div className="text-center py-8">
-              <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500 mb-2">No complaints found</p>
-              <p className="text-sm text-gray-400">
+              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground mb-2">No complaints found</p>
+              <p className="text-sm text-muted-foreground">
                 {searchTerm ||
                 statusFilter !== "all" ||
                 priorityFilter !== "all"
@@ -571,7 +571,7 @@ const ComplaintsList: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="max-h-[500px] overflow-x-auto overflow-y-auto border rounded-md bg-white shadow-sm p-2">
+              <div className="max-h-[500px] overflow-x-auto overflow-y-auto border border-border rounded-md bg-card shadow-sm p-2">
                 <Table className="min-w-max">
                   <TableHeader>
                     <TableRow>
@@ -614,7 +614,7 @@ const ComplaintsList: React.FC = () => {
                         <TableCell>
                           <div className="max-w-xs">
                             <p className="truncate">{complaint.description}</p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               {complaint.type.replace("_", " ")}
                             </p>
                           </div>

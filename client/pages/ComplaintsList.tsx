@@ -570,7 +570,8 @@ const ComplaintsList: React.FC = () => {
             </div>
           ) : (
             <>
-              <Table>
+              <div className="max-h-[500px] overflow-x-auto overflow-y-auto border rounded-md bg-white shadow-sm p-2">
+                <Table className="min-w-max">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Complaint ID</TableHead>
@@ -752,7 +753,8 @@ const ComplaintsList: React.FC = () => {
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
+                </Table>
+              </div>
 
               {/* Pagination and records-per-page controls */}
               <div className="flex items-center justify-between mt-4">

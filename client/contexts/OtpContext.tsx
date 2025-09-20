@@ -30,12 +30,24 @@ interface OtpContextValue {
   isOpen: boolean;
 }
 
-const OtpContext = createContext<OtpContextValue | null>(null);
+// Default context value to prevent null errors
+const defaultOtpContextValue: OtpContextValue = {
+  openOtpFlow: () => {
+    console.warn("OTP flow called outside OtpProvider");
+  },
+  closeOtpFlow: () => {
+    console.warn("OTP close called outside OtpProvider");
+  },
+  isOpen: false,
+};
+
+const OtpContext = createContext<OtpContextValue>(defaultOtpContextValue);
 
 export const useOtpFlow = () => {
   const context = useContext(OtpContext);
   if (!context) {
-    throw new Error("useOtpFlow must be used within an OtpProvider");
+    console.warn("useOtpFlow called outside OtpProvider, using defaults");
+    return defaultOtpContextValue;
   }
   return context;
 };

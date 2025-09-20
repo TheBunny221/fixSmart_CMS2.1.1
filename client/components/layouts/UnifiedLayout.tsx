@@ -17,7 +17,7 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Top Navigation - Fixed */}
       <Navigation />
 

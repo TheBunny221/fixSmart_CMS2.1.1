@@ -371,7 +371,7 @@ const AdminConfig: React.FC = () => {
         isActive: ward.isActive,
       };
 
-      let response:any;
+      let response;
       if (ward.id && ward.id !== "") {
         // Update existing ward
         response = await apiCall(`/users/wards/${ward.id}`, {
@@ -1005,14 +1005,14 @@ const AdminConfig: React.FC = () => {
                           >
                             {ward.isActive ? "Active" : "Inactive"}
                           </Badge>
-                          {/* <Button
+                          <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleOpenBoundaryManager(ward)}
                             title="Set Geographic Boundaries"
                           >
                             <Map className="h-3 w-3" />
-                          </Button> */}
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
@@ -1281,33 +1281,21 @@ const AdminConfig: React.FC = () => {
                   </h3>
                   <div className="space-y-4">
                     {(() => {
-                      const s = systemSettings.find(
-                        (x) => x.key === "APP_NAME",
-                      );
+                      const s = systemSettings.find((x) => x.key === "APP_NAME");
                       if (!s) return null;
                       return (
                         <div className="border rounded-lg p-4" key={s.key}>
                           <div className="mb-2">
                             <h4 className="font-medium">Application Name</h4>
-                            <p className="text-sm text-gray-600">
-                              Shown in headers, emails and PDFs.
-                            </p>
+                            <p className="text-sm text-gray-600">Shown in headers, emails and PDFs.</p>
                           </div>
                           <Input
                             type="text"
                             value={s.value}
                             onChange={(e) =>
-                              setSystemSettings((prev) =>
-                                prev.map((it) =>
-                                  it.key === s.key
-                                    ? { ...it, value: e.target.value }
-                                    : it,
-                                ),
-                              )
+                              setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value: e.target.value } : it)))
                             }
-                            onBlur={(e) =>
-                              handleUpdateSystemSetting(s.key, e.target.value)
-                            }
+                            onBlur={(e) => handleUpdateSystemSetting(s.key, e.target.value)}
                             placeholder="Enter application name"
                             className="max-w-md"
                           />
@@ -1315,78 +1303,94 @@ const AdminConfig: React.FC = () => {
                       );
                     })()}
                     {(() => {
-                      const s = systemSettings.find(
-                        (x) => x.key === "APP_LOGO_URL",
-                      );
+                      const s = systemSettings.find((x) => x.key === "APP_LOGO_URL");
                       if (!s) return null;
                       return (
                         <div className="border rounded-lg p-4" key={s.key}>
                           <div className="mb-2 flex items-center justify-between">
                             <div>
-                              <h4 className="font-medium">
-                                Application Logo URL
-                              </h4>
-                              <p className="text-sm text-gray-600">
-                                Public URL for the logo shown in the header and
-                                PDFs.
-                              </p>
+                              <h4 className="font-medium">Application Logo</h4>
+                              <p className="text-sm text-gray-600">Use a public URL or upload a file. Uploading will automatically update the URL.</p>
                             </div>
                             {s.value && (
-                              <img
-                                src={s.value}
-                                alt="Logo"
-                                className="h-10 w-10 object-contain border rounded ml-4"
-                                onError={(e) =>
-                                  ((
-                                    e.target as HTMLImageElement
-                                  ).style.display = "none")
-                                }
-                              />
+                              <img src={s.value} alt="Logo" className="h-10 w-10 object-contain border rounded ml-4" onError={(e) => ((e.target as HTMLImageElement).style.display = "none")} />
                             )}
                           </div>
-                          <Input
-                            type="text"
-                            value={s.value}
-                            onChange={(e) =>
-                              setSystemSettings((prev) =>
-                                prev.map((it) =>
-                                  it.key === s.key
-                                    ? { ...it, value: e.target.value }
-                                    : it,
-                                ),
-                              )
-                            }
-                            onBlur={(e) =>
-                              handleUpdateSystemSetting(s.key, e.target.value)
-                            }
-                            placeholder="https://.../logo.png"
-                            className="max-w-md"
-                          />
+
+                          {/* URL/File mode toggle */}
+                          <div className="flex gap-4 mb-3">
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="radio"
+                                value="url"
+                                checked={logoUploadMode === "url"}
+                                onChange={(e) => setLogoUploadMode(e.target.value as "url" | "file")}
+                                className="form-radio"
+                              />
+                              <span>URL</span>
+                            </label>
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="radio"
+                                value="file"
+                                checked={logoUploadMode === "file"}
+                                onChange={(e) => setLogoUploadMode(e.target.value as "url" | "file")}
+                                className="form-radio"
+                              />
+                              <span>Upload File</span>
+                            </label>
+                          </div>
+
+                          {logoUploadMode === "url" ? (
+                            <Input
+                              type="text"
+                              value={s.value}
+                              onChange={(e) =>
+                                setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value: e.target.value } : it)))
+                              }
+                              onBlur={(e) => handleUpdateSystemSetting(s.key, e.target.value)}
+                              placeholder="https://.../logo.png"
+                              className="max-w-md"
+                            />
+                          ) : (
+                            <div className="space-y-2">
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    setLogoFile(file);
+                                    const url = await handleLogoFileUpload(file);
+                                    setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value: url } : it)));
+                                    resetLogoUploadState();
+                                  }
+                                }}
+                                className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                              />
+                              {logoPreview && (
+                                <div className="mt-2">
+                                  <img src={logoPreview} alt="Logo preview" className="h-16 w-16 object-contain border rounded" />
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     })()}
                     {(() => {
-                      const s = systemSettings.find(
-                        (x) => x.key === "APP_LOGO_SIZE",
-                      );
+                      const s = systemSettings.find((x) => x.key === "APP_LOGO_SIZE");
                       if (!s) return null;
                       return (
                         <div className="border rounded-lg p-4" key={s.key}>
                           <div className="mb-2">
                             <h4 className="font-medium">Logo Size</h4>
-                            <p className="text-sm text-gray-600">
-                              Controls the displayed logo size
-                              (small/medium/large).
-                            </p>
+                            <p className="text-sm text-gray-600">Controls the displayed logo size (small/medium/large).</p>
                           </div>
                           <Select
                             value={s.value}
                             onValueChange={(value) => {
-                              setSystemSettings((prev) =>
-                                prev.map((it) =>
-                                  it.key === s.key ? { ...it, value } : it,
-                                ),
-                              );
+                              setSystemSettings((prev) => prev.map((it) => (it.key === s.key ? { ...it, value } : it)));
                               handleUpdateSystemSetting(s.key, value);
                             }}
                           >
@@ -1401,125 +1405,6 @@ const AdminConfig: React.FC = () => {
                           </Select>
                         </div>
                       );
-                    })()}
-                  </div>
-                </div>
-
-                {/* General Settings */}
-                <div>
-                  <h3 className="text-lg font-medium mb-4 flex items-center">
-                    <Shield className="h-5 w-5 mr-2" />
-                    General Settings
-                  </h3>
-                  <div className="space-y-4">
-                    {(() => {
-                      const keys = [
-                        "DATE_TIME_FORMAT",
-                        "TIME_ZONE",
-                        "DEFAULT_SLA_HOURS",
-                        "OTP_EXPIRY_MINUTES",
-                        "MAX_FILE_SIZE_MB",
-                        "NOTIFICATION_SETTINGS",
-                        "ADMIN_EMAIL",
-                      ];
-                      return keys
-                        .map((k) => systemSettings.find((s) => s.key === k))
-                        .filter(Boolean)
-                        .map((setting) => (
-                          <div
-                            key={setting!.key}
-                            className="border rounded-lg p-4"
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <div className="flex-1">
-                                <h4 className="font-medium">
-                                  {(
-                                    {
-                                      DATE_TIME_FORMAT: "Date & Time Format",
-                                      TIME_ZONE: "Time Zone",
-                                      DEFAULT_SLA_HOURS: "Default SLA (hours)",
-                                      OTP_EXPIRY_MINUTES:
-                                        "OTP Expiry (minutes)",
-                                      MAX_FILE_SIZE_MB: "Max File Size (MB)",
-                                      NOTIFICATION_SETTINGS:
-                                        "Notification Settings",
-                                      ADMIN_EMAIL: "Administrator Email",
-                                    } as any
-                                  )[setting!.key] || setting!.key}
-                                </h4>
-                                <p className="text-sm text-gray-600">
-                                  {setting!.description}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="mt-3">
-                              {setting!.key === "NOTIFICATION_SETTINGS" ? (
-                                <Textarea
-                                  value={setting!.value}
-                                  onChange={(e) =>
-                                    setSystemSettings((prev) =>
-                                      prev.map((s) =>
-                                        s.key === setting!.key
-                                          ? { ...s, value: e.target.value }
-                                          : s,
-                                      ),
-                                    )
-                                  }
-                                  onBlur={(e) =>
-                                    handleUpdateSystemSetting(
-                                      setting!.key,
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="max-w-md"
-                                />
-                              ) : setting!.type === "number" ? (
-                                <Input
-                                  type="number"
-                                  value={setting!.value}
-                                  onChange={(e) =>
-                                    setSystemSettings((prev) =>
-                                      prev.map((s) =>
-                                        s.key === setting!.key
-                                          ? { ...s, value: e.target.value }
-                                          : s,
-                                      ),
-                                    )
-                                  }
-                                  onBlur={(e) =>
-                                    handleUpdateSystemSetting(
-                                      setting!.key,
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="max-w-md"
-                                />
-                              ) : (
-                                <Input
-                                  type="text"
-                                  value={setting!.value}
-                                  onChange={(e) =>
-                                    setSystemSettings((prev) =>
-                                      prev.map((s) =>
-                                        s.key === setting!.key
-                                          ? { ...s, value: e.target.value }
-                                          : s,
-                                      ),
-                                    )
-                                  }
-                                  onBlur={(e) =>
-                                    handleUpdateSystemSetting(
-                                      setting!.key,
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="max-w-md"
-                                />
-                              )}
-                            </div>
-                          </div>
-                        ));
                     })()}
                   </div>
                 </div>
@@ -1545,6 +1430,7 @@ const AdminConfig: React.FC = () => {
                                 {setting.description}
                               </p>
                             </div>
+
                           </div>
                           <div className="mt-3">
                             <Input
@@ -1637,6 +1523,7 @@ const AdminConfig: React.FC = () => {
                                 location
                               </p>
                             </div>
+
                           </div>
                           <div className="mt-3">
                             <Select
@@ -1704,64 +1591,29 @@ const AdminConfig: React.FC = () => {
                     Map & Location Settings
                   </h3>
                   <div className="space-y-4">
-                    {systemSettings.filter((s) => s.key.startsWith("MAP_"))
-                      .length === 0 && (
+                    {systemSettings.filter((s) => s.key.startsWith("MAP_")).length === 0 && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
                         No map settings configured yet.
                       </div>
                     )}
                     {/* Core map settings */}
                     {systemSettings
-                      .filter((s) =>
-                        [
-                          "MAP_SEARCH_PLACE",
-                          "MAP_DEFAULT_LAT",
-                          "MAP_DEFAULT_LNG",
-                        ].includes(s.key),
-                      )
+                      .filter((s) => ["MAP_SEARCH_PLACE","MAP_DEFAULT_LAT","MAP_DEFAULT_LNG"].includes(s.key))
                       .map((setting) => (
-                        <div
-                          key={setting.key}
-                          className="border rounded-lg p-4"
-                        >
+                        <div key={setting.key} className="border rounded-lg p-4">
                           <div className="mb-2">
-                            <h4 className="font-medium">
-                              {(
-                                {
-                                  MAP_SEARCH_PLACE: "Search Place Context",
-                                  MAP_DEFAULT_LAT: "Default Latitude",
-                                  MAP_DEFAULT_LNG: "Default Longitude",
-                                  MAP_COUNTRY_CODES:
-                                    "Country Codes (ISO2, comma-separated)",
-                                  MAP_BBOX_NORTH: "Bounding Box North",
-                                  MAP_BBOX_SOUTH: "Bounding Box South",
-                                  MAP_BBOX_EAST: "Bounding Box East",
-                                  MAP_BBOX_WEST: "Bounding Box West",
-                                } as any
-                              )[setting.key] || setting.key}
-                            </h4>
-                            <p className="text-sm text-gray-600">
-                              {setting.description}
-                            </p>
+                            <h4 className="font-medium">{({MAP_SEARCH_PLACE:"Search Place Context",MAP_DEFAULT_LAT:"Default Latitude",MAP_DEFAULT_LNG:"Default Longitude",MAP_COUNTRY_CODES:"Country Codes (ISO2, comma-separated)",MAP_BBOX_NORTH:"Bounding Box North",MAP_BBOX_SOUTH:"Bounding Box South",MAP_BBOX_EAST:"Bounding Box East",MAP_BBOX_WEST:"Bounding Box West"} as any)[setting.key] || setting.key}</h4>
+                            <p className="text-sm text-gray-600">{setting.description}</p>
                           </div>
                           <Input
                             type={setting.type === "number" ? "number" : "text"}
                             value={setting.value}
                             onChange={(e) =>
                               setSystemSettings((prev) =>
-                                prev.map((s) =>
-                                  s.key === setting.key
-                                    ? { ...s, value: e.target.value }
-                                    : s,
-                                ),
+                                prev.map((s) => (s.key === setting.key ? { ...s, value: e.target.value } : s)),
                               )
                             }
-                            onBlur={(e) =>
-                              handleUpdateSystemSetting(
-                                setting.key,
-                                e.target.value,
-                              )
-                            }
+                            onBlur={(e) => handleUpdateSystemSetting(setting.key, e.target.value)}
                             placeholder={`Enter ${setting.type} value`}
                             className="max-w-md"
                           />
@@ -1770,14 +1622,8 @@ const AdminConfig: React.FC = () => {
 
                     {/* Advanced map settings */}
                     <div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowAdvancedMap((v) => !v)}
-                      >
-                        {showAdvancedMap
-                          ? "Hide Advanced Map Settings"
-                          : "Show Advanced Map Settings"}
+                      <Button variant="outline" size="sm" onClick={() => setShowAdvancedMap((v) => !v)}>
+                        {showAdvancedMap ? "Hide Advanced Map Settings" : "Show Advanced Map Settings"}
                       </Button>
                       {showAdvancedMap && (
                         <div className="mt-3 space-y-4">
@@ -1785,60 +1631,23 @@ const AdminConfig: React.FC = () => {
                             .filter(
                               (s) =>
                                 s.key.startsWith("MAP_") &&
-                                ![
-                                  "MAP_SEARCH_PLACE",
-                                  "MAP_DEFAULT_LAT",
-                                  "MAP_DEFAULT_LNG",
-                                ].includes(s.key),
+                                !["MAP_SEARCH_PLACE","MAP_DEFAULT_LAT","MAP_DEFAULT_LNG"].includes(s.key),
                             )
                             .map((setting) => (
-                              <div
-                                key={setting.key}
-                                className="border rounded-lg p-4"
-                              >
+                              <div key={setting.key} className="border rounded-lg p-4">
                                 <div className="mb-2">
-                                  <h4 className="font-medium">
-                                    {(
-                                      {
-                                        MAP_SEARCH_PLACE:
-                                          "Search Place Context",
-                                        MAP_DEFAULT_LAT: "Default Latitude",
-                                        MAP_DEFAULT_LNG: "Default Longitude",
-                                        MAP_COUNTRY_CODES:
-                                          "Country Codes (ISO2, comma-separated)",
-                                        MAP_BBOX_NORTH: "Bounding Box North",
-                                        MAP_BBOX_SOUTH: "Bounding Box South",
-                                        MAP_BBOX_EAST: "Bounding Box East",
-                                        MAP_BBOX_WEST: "Bounding Box West",
-                                      } as any
-                                    )[setting.key] || setting.key}
-                                  </h4>
-                                  <p className="text-sm text-gray-600">
-                                    {setting.description}
-                                  </p>
+                                  <h4 className="font-medium">{({MAP_SEARCH_PLACE:"Search Place Context",MAP_DEFAULT_LAT:"Default Latitude",MAP_DEFAULT_LNG:"Default Longitude",MAP_COUNTRY_CODES:"Country Codes (ISO2, comma-separated)",MAP_BBOX_NORTH:"Bounding Box North",MAP_BBOX_SOUTH:"Bounding Box South",MAP_BBOX_EAST:"Bounding Box East",MAP_BBOX_WEST:"Bounding Box West"} as any)[setting.key] || setting.key}</h4>
+                            <p className="text-sm text-gray-600">{setting.description}</p>
                                 </div>
                                 <Input
-                                  type={
-                                    setting.type === "number"
-                                      ? "number"
-                                      : "text"
-                                  }
+                                  type={setting.type === "number" ? "number" : "text"}
                                   value={setting.value}
                                   onChange={(e) =>
                                     setSystemSettings((prev) =>
-                                      prev.map((s) =>
-                                        s.key === setting.key
-                                          ? { ...s, value: e.target.value }
-                                          : s,
-                                      ),
+                                      prev.map((s) => (s.key === setting.key ? { ...s, value: e.target.value } : s)),
                                     )
                                   }
-                                  onBlur={(e) =>
-                                    handleUpdateSystemSetting(
-                                      setting.key,
-                                      e.target.value,
-                                    )
-                                  }
+                                  onBlur={(e) => handleUpdateSystemSetting(setting.key, e.target.value)}
                                   placeholder={`Enter ${setting.type} value`}
                                   className="max-w-md"
                                 />
@@ -1866,20 +1675,12 @@ const AdminConfig: React.FC = () => {
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex-1">
-                              <h4 className="font-medium">
-                                {(
-                                  {
-                                    CONTACT_HELPLINE: "Helpline Number",
-                                    CONTACT_EMAIL: "Support Email",
-                                    CONTACT_OFFICE_HOURS: "Office Hours",
-                                    CONTACT_OFFICE_ADDRESS: "Office Address",
-                                  } as any
-                                )[setting.key] || setting.key}
-                              </h4>
+                              <h4 className="font-medium">{({CONTACT_HELPLINE:"Helpline Number",CONTACT_EMAIL:"Support Email",CONTACT_OFFICE_HOURS:"Office Hours",CONTACT_OFFICE_ADDRESS:"Office Address"} as any)[setting.key] || setting.key}</h4>
                               <p className="text-sm text-gray-600">
                                 {setting.description}
                               </p>
                             </div>
+
                           </div>
                           <div className="mt-3">
                             <Input
@@ -1908,6 +1709,7 @@ const AdminConfig: React.FC = () => {
                       ))}
                   </div>
                 </div>
+
               </div>
             </CardContent>
           </Card>

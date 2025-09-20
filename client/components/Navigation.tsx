@@ -415,54 +415,55 @@ const Navigation: React.FC = () => {
           <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {/* Notifications */}
             {false && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="relative"
-                  aria-label="Notifications"
-                >
-                  <Bell className="h-5 w-5" />
-                  {getUnreadNotificationCount() > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                    >
-                      {getUnreadNotificationCount()}
-                    </Badge>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="p-2">
-                  <h3 className="font-semibold text-sm mb-2">
-                    {translations?.auth?.notifications || "Notifications"}
-                  </h3>
-                  {notifications.length === 0 ? (
-                    <p className="text-sm text-gray-500">
-                      {translations?.common?.noData || "No notifications"}
-                    </p>
-                  ) : (
-                    notifications.slice(0, 5).map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-2 rounded-md mb-2 ${
-                          notification.isRead ? "bg-gray-50" : "bg-blue-50"
-                        }`}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="relative"
+                    aria-label="Notifications"
+                  >
+                    <Bell className="h-5 w-5" />
+                    {getUnreadNotificationCount() > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
                       >
-                        <p className="text-sm font-medium">
-                          {notification.title}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          {notification.message}
-                        </p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>)}
+                        {getUnreadNotificationCount()}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  <div className="p-2">
+                    <h3 className="font-semibold text-sm mb-2">
+                      {translations?.auth?.notifications || "Notifications"}
+                    </h3>
+                    {notifications.length === 0 ? (
+                      <p className="text-sm text-gray-500">
+                        {translations?.common?.noData || "No notifications"}
+                      </p>
+                    ) : (
+                      notifications.slice(0, 5).map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-2 rounded-md mb-2 ${
+                            notification.isRead ? "bg-gray-50" : "bg-blue-50"
+                          }`}
+                        >
+                          <p className="text-sm font-medium">
+                            {notification.title}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {notification.message}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
 
             {/* Language Selector */}
             <DropdownMenu>

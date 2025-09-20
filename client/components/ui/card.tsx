@@ -69,7 +69,9 @@ const CardContent = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
   const ui = useUIConfig();
-  return <div ref={ref} className={cn(ui.card.content, className)} {...props} />;
+  return (
+    <div ref={ref} className={cn(ui.card.content, className)} {...props} />
+  );
 });
 CardContent.displayName = "CardContent";
 
@@ -79,7 +81,11 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => {
   const ui = useUIConfig();
   return (
-    <div ref={ref} className={cn("flex items-center", ui.card.footer, className)} {...props} />
+    <div
+      ref={ref}
+      className={cn("flex items-center", ui.card.footer, className)}
+      {...props}
+    />
   );
 });
 CardFooter.displayName = "CardFooter";

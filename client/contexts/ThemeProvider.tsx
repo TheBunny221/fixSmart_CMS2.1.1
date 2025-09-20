@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { UI_CONFIG } from "@/config/ui.config";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { selectTheme, setTheme } from "@/store/slices/uiSlice";
@@ -12,10 +18,15 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function getSystemPrefersDark(): boolean {
   if (typeof window === "undefined") return false;
-  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
 }
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const dispatch = useAppDispatch();
   const themeSetting = useAppSelector(selectTheme); // 'light' | 'dark' | 'system'
 
@@ -48,10 +59,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         localStorage.setItem("theme", val ? "dark" : "light");
       },
     }),
-    [isDarkMode, dispatch]
+    [isDarkMode, dispatch],
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 };
 
 export function useThemeMode() {

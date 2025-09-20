@@ -45,7 +45,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     const ui = useUIConfig();
     const sizeClass =
-      size === "lg" ? ui.button.large : size === "sm" ? ui.button.small : ui.button.default;
+      size === "lg"
+        ? ui.button.large
+        : size === "sm"
+          ? ui.button.small
+          : ui.button.default;
     return (
       <Comp
         className={cn(
@@ -53,7 +57,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           ui.borderRadius,
           ui.button.base,
           sizeClass,
-          buttonVariants({ variant, size, className })
+          buttonVariants({ variant, size, className }),
         )}
         ref={ref}
         {...props}

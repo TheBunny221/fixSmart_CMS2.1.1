@@ -63,6 +63,7 @@ export default defineConfig(({ mode }) => {
       port: clientPort,
       fs: {
         allow: [
+          "./index.html",
           "./client",
           "./shared",
           path.resolve(__dirname, "./node_modules/leaflet/dist"),

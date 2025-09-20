@@ -20,61 +20,97 @@ import RoleBasedRoute from "./components/RoleBasedRoute";
 import RoleBasedDashboard from "./components/RoleBasedDashboard";
 import { Loader2 } from "lucide-react";
 
-// Lazy load components for better performance
-const Index = lazy(() => import("./pages/Index"));
-const Login = lazy(() => import("./pages/Login"));
-const Register = lazy(() => import("./pages/Register"));
-const SetPassword = lazy(() => import("./pages/SetPassword"));
-const Profile = lazy(() => import("./pages/Profile"));
-const Unauthorized = lazy(() => import("./pages/Unauthorized"));
-
-// Role-specific dashboards
-const CitizenDashboard = lazy(() => import("./pages/CitizenDashboard"));
-const WardOfficerDashboard = lazy(() => import("./pages/WardOfficerDashboard"));
-const MaintenanceDashboard = lazy(() => import("./pages/MaintenanceDashboard"));
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-
-// Complaint management
-const ComplaintsList = lazy(() => import("./pages/ComplaintsList"));
-const ComplaintDetails = lazy(() => import("./pages/ComplaintDetails"));
-const CreateComplaint = lazy(() => import("./pages/CreateComplaint"));
-const CitizenComplaintForm = lazy(() => import("./pages/CitizenComplaintForm"));
-const GuestComplaintForm = lazy(() => import("./pages/GuestComplaintForm"));
-const UnifiedComplaintForm = lazy(() => import("./pages/UnifiedComplaintForm"));
-const QuickComplaintPage = lazy(() => import("./pages/QuickComplaintPage"));
-const GuestTrackComplaint = lazy(() => import("./pages/GuestTrackComplaint"));
-const GuestServiceRequest = lazy(() => import("./pages/GuestServiceRequest"));
-const GuestDashboard = lazy(() => import("./pages/GuestDashboard"));
-
-// Ward Officer pages
-const WardTasks = lazy(() => import("./pages/WardTasks"));
-const WardManagement = lazy(() => import("./pages/WardManagement"));
-
-// Maintenance Team pages
-const MaintenanceTasks = lazy(() => import("./pages/MaintenanceTasks"));
-const TaskDetails = lazy(() => import("./pages/TaskDetails"));
-
-// Admin pages
-const AdminUsers = lazy(() => import("./pages/AdminUsers"));
-const UnifiedReports = lazy(() => import("./pages/UnifiedReports"));
-const AdminConfig = lazy(() => import("./pages/AdminConfig"));
-const AdminLanguages = lazy(() => import("./pages/AdminLanguages"));
-
-// Communication
-const Messages = lazy(() => import("./pages/Messages"));
-
-// Settings
-const Settings = lazy(() => import("./pages/Settings"));
-
-// Loading component
-const LoadingFallback: React.FC = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="flex items-center space-x-2">
-      <Loader2 className="h-6 w-6 animate-spin" />
-      <span>Loading...</span>
+/** --- Small, consistent fallback --- */
+const RouteLoader: React.FC<{ label?: string }> = ({ label = "Loading..." }) => (
+  <div className="flex items-center justify-center min-h-[40vh]">
+    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+      <Loader2 className="h-4 w-4 animate-spin" />
+      <span>{label}</span>
     </div>
   </div>
 );
+
+/** --- Robust lazy with retry + one-time refresh for stale chunks --- */
+function lazyWithRetry<T extends React.ComponentType<any>>(
+  factory: () => Promise<{ default: T }>,
+  { retries = 3, baseDelay = 400 }: { retries?: number; baseDelay?: number } = {}
+) {
+  let attempt = 0;
+
+  const load = async (): Promise<{ default: T }> => {
+    try {
+      return await factory();
+    } catch (err) {
+      attempt += 1;
+
+      // If we have retries left, backoff and retry
+      if (attempt <= retries) {
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        await new Promise((r) => setTimeout(r, delay));
+        return load();
+      }
+
+      // Final guard: if it looks like a chunk/import fetch error, reload once
+      const key = "__lazy_chunk_reloaded__";
+      const message = (err as Error)?.message ?? "";
+      const isChunkError =
+        /Loading chunk|import|Failed to fetch dynamically imported module|chunk/i.test(
+          message
+        );
+
+      if (isChunkError && typeof window !== "undefined") {
+        const already = sessionStorage.getItem(key) === "1";
+        if (!already) {
+          sessionStorage.setItem(key, "1");
+          window.location.reload();
+        }
+      }
+
+      // Rethrow if we can't recover
+      throw err;
+    }
+  };
+
+  return lazy(load);
+}
+
+/** --- Lazy imports (no file extensions, exact case matches filenames) --- */
+const Index = lazyWithRetry(() => import("./pages/Index"));
+const Login = lazyWithRetry(() => import("./pages/Login"));
+const Register = lazyWithRetry(() => import("./pages/Register"));
+const SetPassword = lazyWithRetry(() => import("./pages/SetPassword"));
+const Profile = lazyWithRetry(() => import("./pages/Profile"));
+const Unauthorized = lazyWithRetry(() => import("./pages/Unauthorized"));
+
+const CitizenDashboard = lazyWithRetry(() => import("./pages/CitizenDashboard"));
+const WardOfficerDashboard = lazyWithRetry(() => import("./pages/WardOfficerDashboard"));
+const MaintenanceDashboard = lazyWithRetry(() => import("./pages/MaintenanceDashboard"));
+const AdminDashboard = lazyWithRetry(() => import("./pages/AdminDashboard"));
+
+const ComplaintsList = lazyWithRetry(() => import("./pages/ComplaintsList"));
+const ComplaintDetails = lazyWithRetry(() => import("./pages/ComplaintDetails"));
+const CreateComplaint = lazyWithRetry(() => import("./pages/CreateComplaint"));
+const CitizenComplaintForm = lazyWithRetry(() => import("./pages/CitizenComplaintForm"));
+const GuestComplaintForm = lazyWithRetry(() => import("./pages/GuestComplaintForm"));
+const UnifiedComplaintForm = lazyWithRetry(() => import("./pages/UnifiedComplaintForm"));
+const QuickComplaintPage = lazyWithRetry(() => import("./pages/QuickComplaintPage"));
+const GuestTrackComplaint = lazyWithRetry(() => import("./pages/GuestTrackComplaint"));
+const GuestServiceRequest = lazyWithRetry(() => import("./pages/GuestServiceRequest"));
+const GuestDashboard = lazyWithRetry(() => import("./pages/GuestDashboard"));
+
+const WardTasks = lazyWithRetry(() => import("./pages/WardTasks"));
+const WardManagement = lazyWithRetry(() => import("./pages/WardManagement"));
+
+const MaintenanceTasks = lazyWithRetry(() => import("./pages/MaintenanceTasks"));
+const TaskDetails = lazyWithRetry(() => import("./pages/TaskDetails"));
+
+const AdminUsers = lazyWithRetry(() => import("./pages/AdminUsers"));
+const UnifiedReports = lazyWithRetry(() => import("./pages/UnifiedReports"));
+const AdminConfig = lazyWithRetry(() => import("./pages/AdminConfig"));
+const AdminLanguages = lazyWithRetry(() => import("./pages/AdminLanguages"));
+
+const Messages = lazyWithRetry(() => import("./pages/Messages"));
+const Settings = lazyWithRetry(() => import("./pages/Settings"));
 
 const App: React.FC = () => {
   return (
@@ -86,325 +122,390 @@ const App: React.FC = () => {
               <TooltipProvider>
                 <Router>
                   <div className="min-h-screen bg-gray-50">
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Routes>
-                        {/* Public routes */}
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route
-                          path="/set-password/:token"
-                          element={<SetPassword />}
-                        />
-                        <Route
-                          path="/guest/complaint"
-                          element={<GuestComplaintForm />}
-                        />
-                        <Route
-                          path="/complaint"
-                          element={<QuickComplaintPage />}
-                        />
-                        <Route
-                          path="/guest/track"
-                          element={<GuestTrackComplaint />}
-                        />
-                        <Route
-                          path="/guest/service-request"
-                          element={<GuestServiceRequest />}
-                        />
-                        <Route
-                          path="/guest/dashboard"
-                          element={<GuestDashboard />}
-                        />
-                        <Route
-                          path="/unauthorized"
-                          element={<Unauthorized />}
-                        />
+                    {/* Keep the outer UI immediate; scope Suspense to each route */}
+                    <Routes>
+                      {/* Public routes */}
+                      <Route
+                        path="/login"
+                        element={
+                          <Suspense fallback={<RouteLoader label="Opening login…" />}>
+                            <Login />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/register"
+                        element={
+                          <Suspense fallback={<RouteLoader label="Opening register…" />}>
+                            <Register />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/set-password/:token"
+                        element={
+                          <Suspense fallback={<RouteLoader label="Loading set password…" />}>
+                            <SetPassword />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/guest/complaint"
+                        element={
+                          <Suspense fallback={<RouteLoader />}>
+                            <GuestComplaintForm />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/complaint"
+                        element={
+                          <Suspense fallback={<RouteLoader />}>
+                            <QuickComplaintPage />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/guest/track"
+                        element={
+                          <Suspense fallback={<RouteLoader />}>
+                            <GuestTrackComplaint />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/guest/service-request"
+                        element={
+                          <Suspense fallback={<RouteLoader />}>
+                            <GuestServiceRequest />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/guest/dashboard"
+                        element={
+                          <Suspense fallback={<RouteLoader />}>
+                            <GuestDashboard />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/unauthorized"
+                        element={
+                          <Suspense fallback={<RouteLoader />}>
+                            <Unauthorized />
+                          </Suspense>
+                        }
+                      />
 
-                        {/* Protected and Public Routes */}
-                        {/* Home route */}
-                        <Route
-                          path="/"
-                          element={
-                            <UnifiedLayout>
+                      {/* Home */}
+                      <Route
+                        path="/"
+                        element={
+                          <UnifiedLayout>
+                            <Suspense fallback={<RouteLoader label="Loading home…" />}>
                               <Index />
-                            </UnifiedLayout>
-                          }
-                        />
+                            </Suspense>
+                          </UnifiedLayout>
+                        }
+                      />
 
-                        {/* Dashboard routes - Unified role-based routing */}
-                        <Route
-                          path="/dashboard"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={[
-                                  "CITIZEN",
-                                  "WARD_OFFICER",
-                                  "MAINTENANCE_TEAM",
-                                  "ADMINISTRATOR",
-                                ]}
-                              >
+                      {/* Dashboard (role-based) */}
+                      <Route
+                        path="/dashboard"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <Suspense fallback={<RouteLoader label="Opening dashboard…" />}>
                                 <RoleBasedDashboard />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
 
-                        {/* Complaint routes */}
-                        <Route
-                          path="/complaints"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={[
-                                  "CITIZEN",
-                                  "WARD_OFFICER",
-                                  "MAINTENANCE_TEAM",
-                                  "ADMINISTRATOR",
-                                ]}
-                              >
+                      {/* Complaints */}
+                      <Route
+                        path="/complaints"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <Suspense fallback={<RouteLoader label="Loading complaints…" />}>
                                 <ComplaintsList />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        <Route
-                          path="/complaints/create"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={[
-                                  "CITIZEN",
-                                  "WARD_OFFICER",
-                                  "MAINTENANCE_TEAM",
-                                  "ADMINISTRATOR",
-                                ]}
-                              >
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route
+                        path="/complaints/create"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <Suspense fallback={<RouteLoader label="Opening form…" />}>
                                 <CreateComplaint />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        <Route
-                          path="/complaints/citizen-form"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute allowedRoles={["CITIZEN"]}>
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route
+                        path="/complaints/citizen-form"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute allowedRoles={["CITIZEN"]}>
+                              <Suspense fallback={<RouteLoader label="Opening form…" />}>
                                 <QuickComplaintPage />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        <Route
-                          path="/complaints/new"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute allowedRoles={["CITIZEN"]}>
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route
+                        path="/complaints/new"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute allowedRoles={["CITIZEN"]}>
+                              <Suspense fallback={<RouteLoader label="Opening form…" />}>
                                 <QuickComplaintPage />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        <Route
-                          path="/complaints/:id"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={[
-                                  "CITIZEN",
-                                  "WARD_OFFICER",
-                                  "MAINTENANCE_TEAM",
-                                  "ADMINISTRATOR",
-                                ]}
-                              >
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route
+                        path="/complaints/:id"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <Suspense fallback={<RouteLoader label="Loading complaint…" />}>
                                 <ComplaintDetails />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        <Route
-                          path="/complaint/:id"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={[
-                                  "CITIZEN",
-                                  "WARD_OFFICER",
-                                  "MAINTENANCE_TEAM",
-                                  "ADMINISTRATOR",
-                                ]}
-                              >
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route
+                        path="/complaint/:id"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <Suspense fallback={<RouteLoader label="Loading complaint…" />}>
                                 <ComplaintDetails />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
 
-                        {/* Ward Officer routes */}
-                        <Route
-                          path="/tasks"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute allowedRoles={["WARD_OFFICER"]}>
+                      {/* Ward Officer */}
+                      <Route
+                        path="/tasks"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute allowedRoles={["WARD_OFFICER"]}>
+                              <Suspense fallback={<RouteLoader label="Loading tasks…" />}>
                                 <WardTasks />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        <Route
-                          path="/ward"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute allowedRoles={["WARD_OFFICER"]}>
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route
+                        path="/ward"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute allowedRoles={["WARD_OFFICER"]}>
+                              <Suspense fallback={<RouteLoader />}>
                                 <WardManagement />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
 
-                        {/* Maintenance Team routes */}
-                        <Route
-                          path="/maintenance"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={["MAINTENANCE_TEAM"]}
-                              >
+                      {/* Maintenance */}
+                      <Route
+                        path="/maintenance"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute allowedRoles={["MAINTENANCE_TEAM"]}>
+                              <Suspense fallback={<RouteLoader />}>
                                 <MaintenanceTasks />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        <Route
-                          path="/tasks/:id"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={["MAINTENANCE_TEAM"]}
-                              >
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route
+                        path="/tasks/:id"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute allowedRoles={["MAINTENANCE_TEAM"]}>
+                              <Suspense fallback={<RouteLoader label="Loading task…" />}>
                                 <TaskDetails />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
 
-                        {/* Communication routes */}
-                        <Route
-                          path="/messages"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={[
-                                  "WARD_OFFICER",
-                                  "MAINTENANCE_TEAM",
-                                ]}
-                              >
+                      {/* Communication */}
+                      <Route
+                        path="/messages"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["WARD_OFFICER", "MAINTENANCE_TEAM"]}
+                            >
+                              <Suspense fallback={<RouteLoader label="Opening messages…" />}>
                                 <Messages />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
 
-                        {/* Unified Reports route */}
-                        <Route
-                          path="/reports"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={[
-                                  "WARD_OFFICER",
-                                  "ADMINISTRATOR",
-                                  "MAINTENANCE_TEAM",
-                                ]}
-                              >
+                      {/* Reports */}
+                      <Route
+                        path="/reports"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={["WARD_OFFICER", "ADMINISTRATOR", "MAINTENANCE_TEAM"]}
+                            >
+                              <Suspense fallback={<RouteLoader label="Loading reports…" />}>
                                 <UnifiedReports />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
 
-                        {/* Admin routes */}
-                        <Route
-                          path="/admin/users"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
+                      {/* Admin */}
+                      <Route
+                        path="/admin/users"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
+                              <Suspense fallback={<RouteLoader label="Opening users…" />}>
                                 <AdminUsers />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        <Route
-                          path="/admin/config"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route
+                        path="/admin/config"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
+                              <Suspense fallback={<RouteLoader label="Opening config…" />}>
                                 <AdminConfig />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        <Route
-                          path="/admin/languages"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route
+                        path="/admin/languages"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute allowedRoles={["ADMINISTRATOR"]}>
+                              <Suspense fallback={<RouteLoader label="Opening languages…" />}>
                                 <AdminLanguages />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        {/* Redirect old analytics routes to unified reports */}
-                        <Route
-                          path="/admin/analytics"
-                          element={<Navigate to="/reports" replace />}
-                        />
-                        <Route
-                          path="/admin/reports-analytics"
-                          element={<Navigate to="/reports" replace />}
-                        />
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route path="/admin/analytics" element={<Navigate to="/reports" replace />} />
+                      <Route
+                        path="/admin/reports-analytics"
+                        element={<Navigate to="/reports" replace />}
+                      />
 
-                        {/* Profile and Settings */}
-                        <Route
-                          path="/profile"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={[
-                                  "CITIZEN",
-                                  "WARD_OFFICER",
-                                  "MAINTENANCE_TEAM",
-                                  "ADMINISTRATOR",
-                                ]}
-                              >
+                      {/* Profile & Settings */}
+                      <Route
+                        path="/profile"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <Suspense fallback={<RouteLoader />}>
                                 <Profile />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
-                        <Route
-                          path="/settings"
-                          element={
-                            <UnifiedLayout>
-                              <RoleBasedRoute
-                                allowedRoles={[
-                                  "CITIZEN",
-                                  "WARD_OFFICER",
-                                  "MAINTENANCE_TEAM",
-                                  "ADMINISTRATOR",
-                                ]}
-                              >
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
+                      <Route
+                        path="/settings"
+                        element={
+                          <UnifiedLayout>
+                            <RoleBasedRoute
+                              allowedRoles={[
+                                "CITIZEN",
+                                "WARD_OFFICER",
+                                "MAINTENANCE_TEAM",
+                                "ADMINISTRATOR",
+                              ]}
+                            >
+                              <Suspense fallback={<RouteLoader />}>
                                 <Settings />
-                              </RoleBasedRoute>
-                            </UnifiedLayout>
-                          }
-                        />
+                              </Suspense>
+                            </RoleBasedRoute>
+                          </UnifiedLayout>
+                        }
+                      />
 
-                        {/* Catch all route */}
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                      </Routes>
-                    </Suspense>
+                      {/* Catch-all */}
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
                   </div>
+
+                  {/* Global UI outside route Suspense */}
                   <Toaster />
                   <GlobalMessageHandler />
                   <AuthErrorHandler />

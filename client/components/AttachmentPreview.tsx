@@ -19,9 +19,8 @@ import {
   X,
 } from "lucide-react";
 import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
-// Use self-hosted worker file (public/assets/pdf.worker.min.mjs)
-const pdfWorkerSrcUrl = "/assets/pdf.worker.min.mjs";
-import { renderAsync as renderDocx } from "docx-preview";
+// Use CDN worker URL - more reliable than bundling with Vite
+const pdfWorkerSrcUrl = "https://unpkg.com/pdfjs-dist@5.4.149/build/pdf.worker.min.mjs";
 
 type PreviewItem = {
   url: string;
@@ -292,6 +291,12 @@ function DocxViewer({ url }: { url: string }) {
         if (cancelled) return;
         if (ref.current) {
           ref.current.innerHTML = "";
+          // Dynamically import docx-preview to avoid top-level resolution issues
+          const mod = await import("docx-preview");
+          const renderDocx = (mod as any).renderAsync || (mod as any).default?.renderAsync;
+          if (typeof renderDocx !== "function") {
+            throw new Error("docx-preview renderAsync not available");
+          }
           await renderDocx(buf, ref.current, undefined, {
             className: "docx-preview",
             inWrapper: true,
@@ -376,7 +381,7 @@ export default function AttachmentPreview({
         onOpenChange(o);
       }}
     >
-      <DialogContent hideClose className="max-w-[92vw] w-[92vw] h-[86vh] p-0">
+      <DialogContent className="max-w-[92vw] w-[92vw] h-[86vh] p-0">
         <DialogHeader className="px-4 pt-4 pb-2 border-b bg-background/60">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">

@@ -19,6 +19,7 @@ import { SystemConfigProvider } from "./contexts/SystemConfigContext";
 import RoleBasedRoute from "./components/RoleBasedRoute";
 import RoleBasedDashboard from "./components/RoleBasedDashboard";
 import { Loader2 } from "lucide-react";
+import { ThemeProvider } from "./contexts/ThemeProvider";
 
 /** --- Small, consistent fallback --- */
 const RouteLoader: React.FC<{ label?: string }> = ({ label = "Loading..." }) => (
@@ -116,12 +117,13 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <ErrorBoundary>
-        <SystemConfigProvider>
-          <AppInitializer>
-            <OtpProvider>
-              <TooltipProvider>
-                <Router>
-                  <div className="min-h-screen bg-gray-50">
+        <ThemeProvider>
+          <SystemConfigProvider>
+            <AppInitializer>
+              <OtpProvider>
+                <TooltipProvider>
+                  <Router>
+                    <div className="min-h-screen bg-gray-50">
                     {/* Keep the outer UI immediate; scope Suspense to each route */}
                     <Routes>
                       {/* Public routes */}
@@ -506,14 +508,15 @@ const App: React.FC = () => {
                   </div>
 
                   {/* Global UI outside route Suspense */}
-                  <Toaster />
-                  <GlobalMessageHandler />
-                  <AuthErrorHandler />
-                </Router>
-              </TooltipProvider>
-            </OtpProvider>
-          </AppInitializer>
-        </SystemConfigProvider>
+                    <Toaster />
+                    <GlobalMessageHandler />
+                    <AuthErrorHandler />
+                  </Router>
+                </TooltipProvider>
+              </OtpProvider>
+            </AppInitializer>
+          </SystemConfigProvider>
+        </ThemeProvider>
       </ErrorBoundary>
     </Provider>
   );

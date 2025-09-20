@@ -15,6 +15,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Logo } from "./ui/logo";
+import { Switch } from "./ui/switch";
+import { useThemeMode } from "@/contexts/ThemeProvider";
 import {
   Home,
   FileText,
@@ -37,6 +39,8 @@ import {
   UserCheck,
   AlertTriangle,
   PieChart,
+  Moon,
+  Sun,
 } from "lucide-react";
 
 type UserRole =
@@ -57,6 +61,7 @@ interface NavigationItem {
 const Navigation: React.FC = () => {
   const location = useLocation();
   const dispatch = useAppDispatch();
+  const { isDarkMode, setDarkMode } = useThemeMode();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { translations, currentLanguage } = useAppSelector(
     (state) => state.language,
@@ -413,6 +418,16 @@ const Navigation: React.FC = () => {
 
           {/* User Menu */}
           <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
+            {/* Theme Toggle */}
+            <div className="hidden md:flex items-center">
+              <Sun className="h-4 w-4 mr-1 opacity-60" />
+              <Switch
+                checked={isDarkMode}
+                onCheckedChange={(val) => setDarkMode(!!val)}
+                aria-label="Toggle dark mode"
+              />
+              <Moon className="h-4 w-4 ml-1 opacity-60" />
+            </div>
             {/* Notifications */}
             {false && (
               <DropdownMenu>
@@ -574,6 +589,19 @@ const Navigation: React.FC = () => {
                 </div>
               </Link>
             ))}
+          </div>
+
+          {/* Mobile Theme Toggle */}
+          <div className="flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-600">
+            <div className="flex items-center gap-2">
+              <Sun className="h-4 w-4 opacity-60" />
+              <span>Dark Mode</span>
+            </div>
+            <Switch
+              checked={isDarkMode}
+              onCheckedChange={(val) => setDarkMode(!!val)}
+              aria-label="Toggle dark mode"
+            />
           </div>
 
           {/* Mobile Language Selector */}
